@@ -1,5 +1,4 @@
 //Compute Cosine Similarity between different review texts
-//Author: Wen Chen & Mo Zhou, Yelp Fake Review Detection Group
 
 package bigDataAnalytics.project;
 
