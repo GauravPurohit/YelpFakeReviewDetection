@@ -1,152 +1,135 @@
-//Compute Cosine Similarity between different review texts
 
-package bigDataAnalytics.project;
+package IDS561bigDataAnalytics.project;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import org.apache.commons.io.FileUtils;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
-import org.apache.commons.io.FileUtils;
 
-//Compare similarity between two text files
-
+// IDS 561 Big data project- calculation of cosine similarity file 
 public class Cosine_Similarity {
-	public class values {
-		int val1;
-		int val2;
+	public class values 
+	{
+		int values1;
+		int values2;
 
-		values(int v1, int v2) {
-			this.val1 = v1;
-			this.val2 = v2;
+		values(int v1, int v2) 
+		{
+			this.values1 = v1;
+			this.values2 = v2;
 		}
 
-		public void Update_VAl(int v1, int v2) {
-			this.val1 = v1;
-			this.val2 = v2;
+		public void Update_Values(int v1, int v2) 
+		{
+			this.values1 = v1;
+			this.values2 = v2;
 		}
-	}// end of class values
+	}
 
     
 	
 
 	public double Cosine_Similarity_Score(String Text1, String Text2) {
-		double sim_score = 0.0000000;
-		// 1. Identify distinct words from both documents
-		String[] word_seq_text1 = Text1.split(" ");
-		String[] word_seq_text2 = Text2.split(" ");
-		Hashtable<String, values> word_freq_vector = new Hashtable<String, Cosine_Similarity.values>();
-		LinkedList<String> Distinct_words_text_1_2 = new LinkedList<String>();
+		double similarity_score = 0.0;
+		
+		String[] text1WordSequence = Text1.split(" ");
+		String[] text2WordSequence = Text2.split(" ");
+		Hashtable<String, values> wordFrequencyVector = new Hashtable<String, Cosine_Similarity.values>();
+		LinkedList<String> distinctWordsFromBothTexts = new LinkedList<String>();
 
-		// prepare word frequency vector by using Text1
-		for (int i = 0; i < word_seq_text1.length; i++) {
-			String tmp_wd = word_seq_text1[i].trim();
-			if (tmp_wd.length() > 0) {
-				if (word_freq_vector.containsKey(tmp_wd)) {
-					values vals1 = word_freq_vector.get(tmp_wd);
-					int freq1 = vals1.val1 + 1;
-					int freq2 = vals1.val2;
-					vals1.Update_VAl(freq1, freq2);
-					word_freq_vector.put(tmp_wd, vals1);
+		// Word frequency vector preparation for Text1 
+		for (int i = 0; i < text1WordSequence.length; i++) {
+			String text1WordWithoutWhiteSpace = text1WordSequence[i].trim();
+			if (text1WordWithoutWhiteSpace.length() > 0) {
+				if (wordFrequencyVector.containsKey(text1WordWithoutWhiteSpace)) {
+					values vals1 = wordFrequencyVector.get(text1WordWithoutWhiteSpace);
+					int frequency1 = vals1.values1 + 1;
+					int frequency2 = vals1.values2;
+					vals1.Update_Values(frequency1, frequency2);
+					wordFrequencyVector.put(text1WordWithoutWhiteSpace, vals1);
 				} else {
 					values vals1 = new values(1, 0);
-					word_freq_vector.put(tmp_wd, vals1);
-					Distinct_words_text_1_2.add(tmp_wd);
+					wordFrequencyVector.put(text1WordWithoutWhiteSpace, vals1);
+					distinctWordsFromBothTexts.add(text1WordWithoutWhiteSpace);
 				}
 			}
 		}
 
-		// prepare word frequency vector by using Text2
-		for (int i = 0; i < word_seq_text2.length; i++) {
-			String tmp_wd = word_seq_text2[i].trim();
-			if (tmp_wd.length() > 0) {
-				if (word_freq_vector.containsKey(tmp_wd)) {
-					values vals1 = word_freq_vector.get(tmp_wd);
-					int freq1 = vals1.val1;
-					int freq2 = vals1.val2 + 1;
-					vals1.Update_VAl(freq1, freq2);
-					word_freq_vector.put(tmp_wd, vals1);
+		// Word frequency vector preparation for Text2
+		for (int i = 0; i < text2WordSequence.length; i++) {
+			String text2WordWithoutWhiteSpace = text2WordSequence[i].trim();
+			if (text2WordWithoutWhiteSpace.length() > 0) {
+				if (wordFrequencyVector.containsKey(text2WordWithoutWhiteSpace)) {
+					values vals1 = wordFrequencyVector.get(text2WordWithoutWhiteSpace);
+					int frequency1 = vals1.values1;
+					int frequency2 = vals1.values2 + 1;
+					vals1.Update_Values(frequency1, frequency2);
+					wordFrequencyVector.put(text2WordWithoutWhiteSpace, vals1);
 				} else {
 					values vals1 = new values(0, 1);
-					word_freq_vector.put(tmp_wd, vals1);
-					Distinct_words_text_1_2.add(tmp_wd);
+					wordFrequencyVector.put(text2WordWithoutWhiteSpace, vals1);
+					distinctWordsFromBothTexts.add(text2WordWithoutWhiteSpace);
 				}
 			}
 		}
 
-		// calculate the cosine similarity score.
-		double VectAB = 0.0000000;
-		double VectA_Sq = 0.0000000;
-		double VectB_Sq = 0.0000000;
+		// Cosine Similarity score calculation.
+		double VectorAB = 0.0;
+		double VectorA_Sq = 0.0;
+		double VectorB_Sq = 0.0;
 
-		for (int i = 0; i < Distinct_words_text_1_2.size(); i++) {
-			values vals12 = word_freq_vector
-					.get(Distinct_words_text_1_2.get(i));
+		for (int i = 0; i < distinctWordsFromBothTexts.size(); i++) {
+			values vals12 = wordFrequencyVector
+					.get(distinctWordsFromBothTexts.get(i));
 
-			double freq1 = (double) vals12.val1;
-			double freq2 = (double) vals12.val2;
+			double frequency1 = (double) vals12.values1;
+			double frequency2 = (double) vals12.values2;
 
-			VectAB = VectAB + (freq1 * freq2);
+			VectorAB = VectorAB + (frequency1 * frequency2);
 
-			VectA_Sq = VectA_Sq + freq1 * freq1;
-			VectB_Sq = VectB_Sq + freq2 * freq2;
+			VectorA_Sq = VectorA_Sq + frequency1 * frequency1;
+			VectorB_Sq = VectorB_Sq + frequency2 * frequency2;
 		}
 
-		sim_score = ((VectAB) / (Math.sqrt(VectA_Sq) * Math.sqrt(VectB_Sq)));
+		similarity_score = ((VectorAB) / (Math.sqrt(VectorA_Sq) * Math.sqrt(VectorB_Sq)));
 
-		return (sim_score);
+		return (similarity_score);
 	}
 
-	public static void WriteToOneFile(String outputPath, double[] ratingSims,
-			double[] cosineSims , String[] csvString) throws IOException {
-
+	public static void WriteToFile(String outputPath, double[] ratingSimilarity,
+			double[] cosineSimilarity , String[] business_id , String[] user_id ) throws IOException 
+	{
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outputPath, true));
-		if (ratingSims.length == cosineSims.length) {
-			for (int i = 0; i < ratingSims.length; i++) {
-				bw.write(ratingSims[i] + "," + cosineSims[i] + "," + csvString[i] + "," + "\n");
-				// System.out.println(i + ":" + ratingSims[i] + "," +
-				// cosineSims[i] + "\n");
+		if (ratingSimilarity.length == cosineSimilarity.length) 
+		{
+			for (int i = 0; i < ratingSimilarity.length; i++) 
+			{
+				bw.write(ratingSimilarity[i] + "," + cosineSimilarity[i] + "," + business_id[i] + "," + user_id[i] + "," + "\n");		
 			}
-		}
+		}	
 		bw.close();
 	}
 
-	// ------------------------------------------
-	// Main Function
-	// ------------------------------------------
+	
 	public static void main(String[] args) throws IOException {
 
-	
-		String[] allDirs = GetDir
-				.ReturnFolderNames("C:\\Users\\e22789\\Desktop\\yelp\\reviews_dump\\reviews_dump\\"); // Get
-																				// review
-																				// texts
-																				// directory
-
-		int size = allDirs.length;
+		String[] allFolders = GetDir.ProvideNamesOfFolders("D:\\Yelp\\reviews_dump\\"); 																			
+		int size = allFolders.length;
 		for (int num = 0; num < size; num++) {
 
-			
-			String[] allFiles = GetDir.ReturnFolderNames(allDirs[num]); // return
-																		// text
-																		// folder
-																		// names
-			
-			
-			String filePath = "C:\\Users\\e22789\\Desktop\\yelp\\ratings_dump\\"
-					+ allDirs[num].substring(55, allDirs[num].length())
+			String[] allFilesInAFolder = GetDir.ProvideNamesOfFolders(allFolders[num]); 	
+			String filePath = "D:\\Yelp\\ratings_dump\\"
+					+ allFolders[num].substring(21, allFolders[num].length())
 					+ ".txt";
-			File filesize = new File("C:\\Users\\e22789\\Desktop\\yelp\\reviews_dump\\reviews_dump\\"
-					+ allDirs[num].substring(55, allDirs[num].length()));
+			File filesize = new File("D:\\Yelp\\reviews_dump\\"
+					+ allFolders[num].substring(21, allFolders[num].length()));
 			
-			/*if(filePath.contains("Inc."))
-            filePath = filePath.replaceAll("._","_");*/
 			System.out.print(filePath);
 			
 			File file = new File(filePath);
@@ -155,58 +138,56 @@ public class Cosine_Similarity {
 			
 			if(file.exists() && ((dirSize/1024)<999))
 		{		
-		    ratings = Rating_Similarity.CalRateSim(filePath);
+		    ratings = Rating_Similarity.CalculateRatingSimilarity(filePath);
 
-			int numFile = allFiles.length;
+			int folderFileCount = allFilesInAFolder.length;
 
-			String[] inFile = new String[numFile];
+			String[] inFile = new String[folderFileCount];
 
-			for (int num2 = 1; num2 < numFile + 1; num2++) {
-				String text = allFiles[num2 - 1];
+			for (int num2 = 1; num2 < folderFileCount + 1; num2++) {
+				String text = allFilesInAFolder[num2 - 1];
 				byte[] encoded = Files.readAllBytes(Paths.get(text));
 				inFile[num2 - 1] = new String(encoded);
 			}
 
 			Cosine_Similarity cs1 = new Cosine_Similarity();
-			// Use Hash Map to store the data
-			HashMap<keyPair, Double> CosineSims = new HashMap<keyPair, Double>();
-			for (int i = 0; i < numFile - 1; i++) {
-				for (int j = i + 1; j < numFile; j++) {
-					double sim_score = cs1.Cosine_Similarity_Score(
+			HashMap<keyPair, Double> CosineSimsMap = new HashMap<keyPair, Double>();
+			for (int i = 0; i < folderFileCount - 1; i++) {
+				for (int j = i + 1; j < folderFileCount; j++) {
+					double similarity_score = cs1.Cosine_Similarity_Score(
 							inFile[i].toString(), inFile[j].toString());
 					keyPair temp = new keyPair(i, j);
-					CosineSims.put(temp, sim_score);
+					CosineSimsMap.put(temp, similarity_score);
 				}
 			}
 
-			double sumCosineSims = 0;
-			double[] avgCosineSims = new double[numFile];
-			String[] csvString = new String[numFile]; 
+			double sumOfCosineSimilarityScores = 0;
+			double[] avgCosineSimilarityScore = new double[folderFileCount];
+			String[] business_id = new String[folderFileCount]; 
+			String[] user_id = new String[folderFileCount];
 			
-			for (int i = 0; i < numFile; i++) {
-				for (int j = 0; j < numFile; j++) {
+			for (int i = 0; i < folderFileCount; i++) {
+				for (int j = 0; j < folderFileCount; j++) {
 					if (i != j) {
-						keyPair sim = new keyPair(i, j);
-						sumCosineSims += CosineSims.get(sim);
+						keyPair similarityScore = new keyPair(i, j);
+						sumOfCosineSimilarityScores += CosineSimsMap.get(similarityScore);
 					}
 				}
-				avgCosineSims[i] = sumCosineSims / (numFile - 1);
-				System.out.println(" User: " + i +" >>"+ " " + allFiles[i].toString() + " | Review Similarity: "
-						+ avgCosineSims[i] + '\n');
+				avgCosineSimilarityScore[i] = sumOfCosineSimilarityScores / (folderFileCount - 1);
+				System.out.println(" User: " + i +" >>"+ " " + allFilesInAFolder[i].toString() + " | Review Similarity: "
+						+ avgCosineSimilarityScore[i] + '\n');
 				
-				csvString[i] = " User: " + i +" >>"+ " " + allFiles[i].toString() + " | Review Similarity: "
-						+ avgCosineSims[i];
-				sumCosineSims = 0;		
-			    
+				business_id[i] = allFilesInAFolder[i].toString().substring(allFilesInAFolder[i].toString().lastIndexOf("\\")+1, allFilesInAFolder[i].toString().indexOf("^"));
+				user_id[i]= allFilesInAFolder[i].toString().substring(allFilesInAFolder[i].toString().indexOf("^")+1,allFilesInAFolder[i].toString().length()-4);
+				user_id[i]=user_id[i].replaceAll("!", "");
 				
-				
+				sumOfCosineSimilarityScores = 0;		
+			    	
 				
 			}
-			// Write our results to one file
-			// Output is 2D variables of rating similarity and cosine(text)
-			// similarity
+		
 			System.out.println(inFile);
-			WriteToOneFile("C:\\Users\\e22789\\Desktop\\yelp\\output.csv", ratings, avgCosineSims, csvString);
+			WriteToFile("D:\\Yelp\\output.csv", ratings, avgCosineSimilarityScore, business_id, user_id);
 
 		  }
 		}
